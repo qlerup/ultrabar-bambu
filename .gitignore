@@ -1,0 +1,10 @@
+build/
+dist/
+*.apk
+*.idsig
+*.jks
+*.keystore
+__pycache__/
+.env*
+local-package/
+test-results/
