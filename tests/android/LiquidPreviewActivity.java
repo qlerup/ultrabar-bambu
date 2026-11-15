@@ -19,7 +19,7 @@ public final class LiquidPreviewActivity extends Activity {
         try { getContentResolver().call(android.net.Uri.parse("content://dk.ultrabar.bambu.status"),"snapshot",null,null);android.util.Log.e("BambuPreview","FAIL: untrusted preview UID reached provider"); }
         catch(SecurityException expected){android.util.Log.i("BambuPreview","PASS: ordinary app UID rejected by Bambu provider");}
         catch(Exception absent){android.util.Log.i("BambuPreview","Provider unavailable; authorization test not run");}
-        try { spec=new JSONObject("{\"kind\":\"bambu\",\"expandedSlots\":3,\"primary\":\"progress\",\"secondary\":\"remaining\",\"background\":\"#14202b\",\"accent\":\"#86e4c3\"}"); } catch(Exception e){throw new RuntimeException(e);}
+        try { spec=new JSONObject("{\"kind\":\"bambu\",\"expandedSlots\":3,\"primary\":\"progress\",\"secondary\":\"remaining\",\"background\":\"#14202b\",\"accent\":\"#86e4c3\"}");spec.put("expandedSlots",getIntent().getIntExtra("slots",3)); } catch(Exception e){throw new RuntimeException(e);}
         LinearLayout root=new LinearLayout(this);root.setOrientation(1);root.setBackgroundColor(0xff080e16);root.setPadding(0,0,0,20);
         LinearLayout header=new LinearLayout(this);header.setGravity(Gravity.CENTER_VERTICAL);
         TextView mark=text("BAMBU PANEL  /  LIQUID WIDGET",10,0xffeaf4fa);mark.setPadding(20,0,0,0);header.addView(mark,new LinearLayout.LayoutParams(0,20,1));

@@ -17,6 +17,7 @@ jobs:
           python-version: '3.12'
       - name: Install test dependencies
         run: python -m pip install -r requirements-test.txt
+      - uses: android-actions/setup-android@v3
       - name: Test protocol, telemetry and pinned TLS against a fake printer
         run: python test.py
       - name: Build release-mode APK with disposable CI key
@@ -26,7 +27,7 @@ jobs:
           export ANDROID_PLATFORM_JAR="$ANDROID_HOME/platforms/android-35/android.jar"
           export ANDROID_KEYSTORE="$RUNNER_TEMP/ci-signing.jks"
           export ANDROID_KEY_PASSWORD="$(python -c 'import secrets; print(secrets.token_hex(24))')"
-          sdkmanager 'build-tools;35.0.0' 'platforms;android-35' >/dev/null
+          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" 'build-tools;35.0.0' 'platforms;android-35' >/dev/null
           keytool -genkeypair -keystore "$ANDROID_KEYSTORE" -storepass:env ANDROID_KEY_PASSWORD -keypass:env ANDROID_KEY_PASSWORD -alias ci -keyalg RSA -validity 2 -dname 'CN=Disposable CI test key'
           python build.py
       - name: Check compiled launcher, permissions and embedded settings

@@ -64,6 +64,12 @@ public final class PanelTest {
         check(PrinterState.command("light_off", "9").getJSONObject("system").getString("led_mode").equals("off"));
         boolean refused = false; try { PrinterState.command("gcode_line", "10"); } catch (IllegalArgumentException e) { refused = true; } check(refused);
         state.clear(); check(state.snapshot().length() == 0); check(!state.fresh(33001));
+        String announce="NOTIFY * HTTP/1.1\r\nNT: urn:bambulab-com:device:3dprinter:1\r\nUSN: testserial\r\nLOCATION: 8.8.8.8\r\nDevName.bambu.com: Workshop\r\nDevModel.bambu.com: TEST\r\n\r\n";
+        Discovery.Found found=Discovery.parse(announce,"192.168.255.10");check(found!=null&&found.host.equals("192.168.255.10")&&found.serial.equals("TESTSERIAL"));
+        check(Discovery.parse(announce,"8.8.8.8")==null);check(Discovery.parse(announce.replace("bambulab-com","other"),"192.168.255.10")==null);
+        check(Discovery.parse(announce.replace("testserial","../../bad"),"192.168.255.10")==null);
+        check(Discovery.parse(announce+"USN: OTHERPRINTER\r\n","192.168.255.10")==null);
+        check(Discovery.parse(announce.replace("NOTIFY * HTTP/1.1","HTTP/1.1 200 OK"),"192.168.255.10")!=null);
         System.out.println(assertions + " assertions passed: MQTT framing, partial telemetry, freshness, command gates and LAN validation");
     }
 }

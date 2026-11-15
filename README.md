@@ -1,7 +1,8 @@
 # Bambu Panel for UltraBar Studio
 
 A local Bambu Lab printer integration for CoreBAR's ultrawide touchscreen, with
-a companion app and the **Bambu Liquid** native home widget. Studio 0.46 lets each
+a companion app and the **Bambu Liquid** native home widget in **one Store package
+and one installation**. Studio 0.46 lets each
 placed widget choose its readings and unfold smoothly across 2, 3, 4 or 5 slots.
 The companion owns the printer connection and credentials directly on CoreBAR.
 
@@ -17,10 +18,11 @@ widget until the matching Studio update is installed.
 
 ## Install the widget
 
-Install **Bambu Panel** and **Bambu Liquid** from Store after their review. Drag
-the app into Background apps (or onto the bar for setup), drag the liquid widget
-onto Core, and Deploy using Studio 0.46+. Deployment requires the companion APK
-on Core. Open the app once to configure printer profiles; select the printer to
+Install **Bambu Panel** once from Store after review. Drag its liquid widget onto
+Core: Studio automatically adds the bundled app to **Background apps**, once even
+with multiple placed widgets. Deploy with Studio 0.46+ installs the matching APK
+and activates the widget together. App and widget share one source repository,
+Store package and update. Open the app to configure printer profiles; select the printer to
 monitor there. Multiple placed widgets can show different readings for that
 selected printer.
 
@@ -81,6 +83,9 @@ mean a printer has no light, only that this integration cannot safely control it
 
 1. Connect CoreBAR and printer to the same trusted LAN. Find the printer's IP,
    serial number and 8-character LAN access code in its network/device settings.
+   **Search local network** listens for Bambu announcements for up to 8 seconds
+   and fills IP, serial and name after selection. The access code is entered by
+   you. Discovery results still require explicit certificate approval.
 2. Enable the printer's LAN access. Recent firmware may require **LAN Only +
    Developer Mode** for third-party control. Follow your printer's manual; LAN
    Only can disable Bambu Handy/cloud functionality. Do not change modes while
@@ -122,7 +127,10 @@ require an explicit Reconnect; the service never replays printer commands.
 Android permissions are `android.permission.INTERNET`, for the selected printer
 at its private IPv4 address, TCP 8883 using TLS, and
 `android.permission.FOREGROUND_SERVICE`, for the shared widget connection. No account, cloud service,
-advertising, analytics, discovery scan or runtime downloads are used. No camera,
+advertising, analytics, address-range scanning or runtime downloads are used.
+Explicit discovery sends Bambu SSDP queries to multicast/broadcast UDP 1990/2021,
+listens briefly, then closes its sockets. It never guesses passwords or saves
+discovered devices until you save a selected profile. No camera,
 storage, location or microphone permission is required.
 
 Addresses, serials, codes and certificate pins are AES-GCM encrypted using an

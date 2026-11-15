@@ -52,9 +52,11 @@ the outstanding hardware tests have been performed and recorded honestly.
 
 ## Publication
 
-Separate Store PRs change only `submissions/bambu-panel/` and
-`submissions/bambu-liquid/` respectively. The liquid widget also depends on the
-Studio 0.46 runtime and Store Bambu widget contract PRs. Each pins the source repository,
+One Store package PR changes only `submissions/bambu-panel/`. Its APK embeds
+assets/widget.json, identical to the root descriptor and manifest.bundledWidgets.
+Studio stages app and widget in one install, adds one Background apps entry when
+placing a widget, and installs the matching APK at Deploy. The package depends
+on the Studio 0.46 runtime and Store bundle contract PRs. It pins the source repository,
 full 40-character commit and stable release; includes exact README, LICENSE, icon,
 settings descriptor, APK and source.zip. Official immutable artifact/icon mirrors
 and their SHA-256 metadata are required for the published catalog. Do not modify

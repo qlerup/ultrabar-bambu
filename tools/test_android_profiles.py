@@ -16,6 +16,7 @@ def main():
     p = argparse.ArgumentParser()
     p.add_argument("--adb", required=True)
     p.add_argument("--serial", required=True)
+    p.add_argument("--discover", action="store_true", help="Also perform an explicit bounded LAN discovery; prints only count.")
     args = p.parse_args()
     tools = Path(os.environ["ANDROID_BUILD_TOOLS"])
     platform = Path(os.environ["ANDROID_PLATFORM_JAR"])
@@ -26,6 +27,7 @@ def main():
     manifest.write_text('''<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="dk.ultrabar.bambu.tests" android:versionCode="1" android:versionName="1.0">
  <uses-sdk android:minSdkVersion="26" android:targetSdkVersion="29"/>
  <instrumentation android:name="dk.ultrabar.bambu.tests.ProfileProbe" android:targetPackage="dk.ultrabar.bambu"/>
+ <instrumentation android:name="dk.ultrabar.bambu.tests.DiscoveryProbe" android:targetPackage="dk.ultrabar.bambu"/>
  <application android:label="Bambu profile tests" android:debuggable="false"/>
 </manifest>''')
 
@@ -33,7 +35,7 @@ def main():
         subprocess.run(list(map(str, parts)), check=True)
 
     cp = os.pathsep.join(map(str, (platform, ROOT / "build/classes")))
-    run("javac", "-encoding", "UTF-8", "-source", "8", "-target", "8", "-cp", cp, "-d", classes, ROOT / "tests/android/ProfileProbe.java")
+    run("javac", "-encoding", "UTF-8", "-source", "8", "-target", "8", "-cp", cp, "-d", classes, ROOT / "tests/android/ProfileProbe.java", ROOT / "tests/android/DiscoveryProbe.java")
     run("java", "-cp", tools / "lib/d8.jar", "com.android.tools.r8.D8", "--lib", platform, "--min-api", "26", "--output", build, *classes.glob("**/*.class"))
     suffix = ".exe" if os.name == "nt" else ""
     apk = build / "unsigned.apk"
@@ -49,6 +51,10 @@ def main():
         print(result)
         if "PASS:" not in result or "INSTRUMENTATION_CODE: -1" not in result:
             raise SystemExit("Profile instrumentation failed")
+        if args.discover:
+            result=subprocess.check_output(adb+["shell","am","instrument","-r","-w","dk.ultrabar.bambu.tests/dk.ultrabar.bambu.tests.DiscoveryProbe"],timeout=30).decode()
+            print(result)
+            if "PASS:" not in result or "INSTRUMENTATION_CODE: -1" not in result:raise SystemExit("Discovery instrumentation failed")
     finally:
         run(*adb, "uninstall", "dk.ultrabar.bambu.tests")
         run(*adb, "shell", "am", "force-stop", "dk.ultrabar.bambu")

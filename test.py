@@ -27,7 +27,7 @@ def main():
         raise SystemExit("Test dependency checksum mismatch")
     classes = ROOT / "build/tests"
     classes.mkdir(parents=True, exist_ok=True)
-    sources = [ROOT / "src/dk/ultrabar/bambu" / (name + ".java") for name in ("MqttWire", "PrinterState", "PrinterTls", "PrinterLink")]
+    sources = [ROOT / "src/dk/ultrabar/bambu" / (name + ".java") for name in ("MqttWire", "PrinterState", "PrinterTls", "PrinterLink", "Discovery")]
     subprocess.run(["javac", "-encoding", "UTF-8", "-cp", str(jar), "-d", str(classes), *map(str, sources), *map(str, ROOT.glob("tests/*.java"))], check=True)
     import os
     cp = os.pathsep.join((str(classes), str(jar)))

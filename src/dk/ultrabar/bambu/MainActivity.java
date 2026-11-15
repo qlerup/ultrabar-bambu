@@ -190,6 +190,7 @@ public final class MainActivity extends Activity {
         EditText host = field(form, "Private IPv4 address", saved == null ? "" : saved.optString("host"), false);
         EditText serial = field(form, "Printer serial number", saved == null ? "" : saved.optString("serial"), false);
         EditText code = field(form, "8-character LAN access code (blank keeps saved code)", "", true);
+        form.addView(button("Search local network", GREEN, () -> discover(host,serial,profileName)));
         form.addView(text("Enable LAN mode and, where required, Developer Mode on the printer. CoreBAR must be on the same network. Cloud login is not used.", 12, MUTED));
         if (!add) form.addView(button("Forget connection", 0xffffac9e, () -> new AlertDialog.Builder(this).setTitle("Forget printer connection?")
             .setMessage("Removes the saved address, serial, access code and trusted certificate from this app.")
@@ -252,4 +253,18 @@ public final class MainActivity extends Activity {
         }, "bambu-certificate").start();
     }
     private void error(String message) { new AlertDialog.Builder(this).setTitle("Bambu Panel").setMessage(message).setPositiveButton("OK", null).show(); }
+    private void discover(EditText host,EditText serial,EditText label){
+        java.util.concurrent.atomic.AtomicBoolean canceled=new java.util.concurrent.atomic.AtomicBoolean();
+        AlertDialog searching=new AlertDialog.Builder(this).setTitle("Searching for Bambu printers").setMessage("Listening on the local network for up to 8 seconds. No access codes are sent.").setNegativeButton("Cancel",(d,w)->canceled.set(true)).create();
+        searching.setOnCancelListener(d->canceled.set(true));searching.show();
+        new Thread(()->{
+            java.util.List<Discovery.Found> devices;
+            try{devices=Discovery.search(canceled);}catch(Exception e){devices=new java.util.ArrayList<>();}
+            final java.util.List<Discovery.Found> result=devices;
+            runOnUiThread(()->{searching.dismiss();if(!resumed||canceled.get())return;if(result.isEmpty()){error("No printers found. Check that CoreBAR and printers share a network. Guest networks, VLANs or multicast filtering can block discovery. You can still enter IP and serial manually.");return;}
+                String[] choices=new String[result.size()];for(int i=0;i<choices.length;i++){Discovery.Found p=result.get(i);choices[i]=p.name+"  ·  "+p.host+"\n"+p.model+"  ·  "+p.serial;}
+                new AlertDialog.Builder(this).setTitle("Choose a printer").setItems(choices,(d,w)->{Discovery.Found p=result.get(w);host.setText(p.host);serial.setText(p.serial);if(label.getText().toString().trim().isEmpty())label.setText(p.name);Toast.makeText(this,"IP and serial filled. Enter the LAN access code, then Save & connect.",Toast.LENGTH_LONG).show();}).setNegativeButton("Cancel",null).show();
+            });
+        },"bambu-discovery").start();
+    }
 }
