@@ -18,6 +18,9 @@ jobs:
       - name: Install test dependencies
         run: python -m pip install -r requirements-test.txt
       - uses: android-actions/setup-android@v3
+        with:
+          packages: 'platform-tools'
+          log-accepted-android-sdk-licenses: false
       - name: Test protocol, telemetry and pinned TLS against a fake printer
         run: python test.py
       - name: Build release-mode APK with disposable CI key
