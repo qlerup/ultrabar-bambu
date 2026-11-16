@@ -5,12 +5,13 @@ your PC**, choose a printer for each widget, then Save and Deploy. Studio sends
 live readings to Core through the same channel as CPU, RAM and drive widgets.
 No printer setup or companion app is required on Core.
 
-Requires **Studio 0.48.0+**, root-enabled ARM32 CB01 / LineOS 1.0.9, and compatible
+Requires **Studio 0.48.1+**, root-enabled ARM32 CB01 / LineOS 1.0.9, and compatible
 Bambu LAN firmware. Keep Studio running for live readings and controls.
 
 ## Connect printers
 
-1. Install **Bambu** (`studio.bambu.widget`) from Store and drag it onto Core.
+1. Install or update **Bambu** (`studio.bambu`) from Store. Existing placed widgets
+   stay in your layout; new users drag the widget onto Core.
 2. Select the widget and choose **Manage printers → Add printer** in Studio.
 3. Enter a name, private IPv4 address, serial number and eight-character LAN code.
    **Search local network** can fill the address and serial. Enter the code yourself.
@@ -64,11 +65,14 @@ the original icon, widget descriptor and native renderer reference source.
 
 ## Previous Core app
 
-Release 1.x was the `studio.bambu` Android app. The new Studio widget is a separate
-Store registration, `studio.bambu.widget`, because approved package types cannot
-change. Replace old cards with the new widget, select printers in Studio, and
-remove Bambu from Background apps before Deploy. Credentials on Core are not
-silently extracted. Uninstall the old APK separately when no longer needed.
+Release 1.x was the `studio.bambu` Android app. Release 2.0.1 retains that same
+Store identity and appears as **Update** for existing installations. Studio 0.48.1
+keeps placed cards, names, colors, readings and display settings, and removes their
+obsolete companion dependency. Set up and select printer connections in Studio,
+then Save and Deploy. Credentials on Core are not silently extracted or deleted.
+The briefly published `studio.bambu.widget` registration is also consolidated into
+`studio.bambu` when updated; it is not a second product. Uninstall the old APK
+separately when no longer needed.
 The original app source remains available; its documentation is archived in
 [CORE-APP-LEGACY.md](docs/CORE-APP-LEGACY.md).
 
@@ -88,8 +92,8 @@ No claim is made that every Bambu model or firmware has been physically tested.
 
 Publish `widget.json` and `icon.png` as immutable stable release assets. Store pins
 the source commit, copies exact README/LICENSE/icon/descriptor bytes and mirrors
-the reviewed assets with SHA-256 metadata. The widget requires Studio 0.48.0+;
-older clients cannot provide its PC-owned connections.
+the reviewed assets with SHA-256 metadata. The widget requires Studio 0.48.1+;
+older clients cannot provide its complete update migration.
 
 The original Android build instructions remain in the archived Core-app README.
 They are not needed to install or use the Studio widget.
