@@ -22,7 +22,7 @@ public final class LiquidPreviewActivity extends Activity {
         try { spec=new JSONObject("{\"kind\":\"bambu\",\"expandedSlots\":3,\"primary\":\"progress\",\"secondary\":\"remaining\",\"background\":\"#14202b\",\"accent\":\"#86e4c3\"}");spec.put("expandedSlots",getIntent().getIntExtra("slots",3)); } catch(Exception e){throw new RuntimeException(e);}
         LinearLayout root=new LinearLayout(this);root.setOrientation(1);root.setBackgroundColor(0xff080e16);root.setPadding(0,0,0,20);
         LinearLayout header=new LinearLayout(this);header.setGravity(Gravity.CENTER_VERTICAL);
-        TextView mark=text("BAMBU PANEL  /  LIQUID WIDGET",10,0xffeaf4fa);mark.setPadding(20,0,0,0);header.addView(mark,new LinearLayout.LayoutParams(0,20,1));
+        TextView mark=text("BAMBU  /  WIDGET PREVIEW",10,0xffeaf4fa);mark.setPadding(20,0,0,0);header.addView(mark,new LinearLayout.LayoutParams(0,20,1));
         header.addView(text("SAMPLE DATA · NO PRINTER CONNECTION   ",10,0xffc3ad80));
         for(int slots=2;slots<=5;slots++){final int n=slots;Button b=new Button(this);b.setText(slots+" slots");b.setTextSize(9);b.setAllCaps(false);b.setMinHeight(0);b.setMinimumHeight(0);b.setPadding(6,0,6,0);b.setTextColor(0xff86e4c3);b.setBackgroundColor(0xff16212b);b.setOnClickListener(v->{try{spec.put("expandedSlots",n);}catch(Exception ignored){}tile.performClick();});header.addView(b,new LinearLayout.LayoutParams(72,20));}
         root.addView(header,new LinearLayout.LayoutParams(-1,20));LinearLayout row=new LinearLayout(this);

@@ -57,7 +57,7 @@ public final class MainActivity extends Activity {
     private void build() {
         LinearLayout root = vertical(); root.setBackgroundColor(BG); root.setPadding(dp(12), dp(6), dp(12), dp(8));
         LinearLayout header = new LinearLayout(this); header.setGravity(Gravity.CENTER_VERTICAL);
-        title = text("Bambu Panel", 17, TEXT); title.setTypeface(null, Typeface.BOLD);
+        title = text("Bambu", 17, TEXT); title.setTypeface(null, Typeface.BOLD);
         header.addView(title, new LinearLayout.LayoutParams(0, -2, 1));
         badge = text("LOCAL CONNECTION", 11, GREEN); badge.setPadding(dp(10), 0, dp(14), 0); header.addView(badge);
         preview = button("Preview", MUTED, () -> { demo = !demo; disconnect(); if (!demo) connect(); render(); });
@@ -103,7 +103,7 @@ public final class MainActivity extends Activity {
     private void render() {
         if (!demo && resumed) { BambuService.touch(this, false); link = BambuService.selectedMatches(this)?BambuService.current():null; connection = BambuService.status(); detail = BambuService.detail(); }
         try { values = Settings.read(this); } catch (Exception ignored) {}
-        String selectedName = "Bambu Panel";
+        String selectedName = "Bambu";
         try { JSONObject selected = Credentials.read(this); if (selected != null) selectedName = selected.optString("name", selectedName); } catch (Exception ignored) {}
         title.setText(values.optString("printerName", "Bambu Lab") + "  /  " + selectedName); title.setSingleLine(true); title.setEllipsize(android.text.TextUtils.TruncateAt.END);
         if (values.optBoolean("keepScreenOn")) getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
@@ -198,7 +198,7 @@ public final class MainActivity extends Activity {
                 try { disconnect(); Credentials.clear(this); connection = "Not connected"; host.setText(""); serial.setText(""); code.setText(""); render(); }
                 catch (Exception e) { error("Could not remove the saved connection."); }
             }).show()));
-        AlertDialog dialog = new AlertDialog.Builder(this).setTitle("Bambu Panel settings").setView(scroll)
+        AlertDialog dialog = new AlertDialog.Builder(this).setTitle("Bambu settings").setView(scroll)
             .setNegativeButton("Cancel", null).setNeutralButton("Save display", null).setPositiveButton("Save & connect", null).create();
         dialog.setOnShowListener(shown -> {
             Runnable saveDisplay = () -> {
@@ -252,7 +252,7 @@ public final class MainActivity extends Activity {
             } catch (Exception e) { runOnUiThread(() -> { if (resumed && generation == current) { connection = "Not connected"; render(); error("Could not read printer certificate. Check address, network and LAN mode."); } }); }
         }, "bambu-certificate").start();
     }
-    private void error(String message) { new AlertDialog.Builder(this).setTitle("Bambu Panel").setMessage(message).setPositiveButton("OK", null).show(); }
+    private void error(String message) { new AlertDialog.Builder(this).setTitle("Bambu").setMessage(message).setPositiveButton("OK", null).show(); }
     private void discover(EditText host,EditText serial,EditText label){
         java.util.concurrent.atomic.AtomicBoolean canceled=new java.util.concurrent.atomic.AtomicBoolean();
         AlertDialog searching=new AlertDialog.Builder(this).setTitle("Searching for Bambu printers").setMessage("Listening on the local network for up to 8 seconds. No access codes are sent.").setNegativeButton("Cancel",(d,w)->canceled.set(true)).create();

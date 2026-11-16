@@ -36,7 +36,7 @@ public final class BambuService extends Service {
         manager.createNotificationChannel(new NotificationChannel("printer", "Local printer connection", NotificationManager.IMPORTANCE_LOW));
         PendingIntent open = PendingIntent.getActivity(this, 0, new Intent(this, MainActivity.class), PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
         startForeground(1, new Notification.Builder(this, "printer").setSmallIcon(android.R.drawable.stat_notify_sync)
-            .setContentTitle("Bambu Panel").setContentText("Local printer widget connection").setContentIntent(open).setOngoing(true).build());
+            .setContentTitle("Bambu").setContentText("Local printer widget connection").setContentIntent(open).setOngoing(true).build());
         handler.postDelayed(new Runnable() { public void run() {
             if (SystemClock.elapsedRealtime() - touched > 25000) { stopSelf(); return; }
             handler.postDelayed(this, 5000);
