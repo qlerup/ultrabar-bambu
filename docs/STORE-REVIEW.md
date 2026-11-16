@@ -1,5 +1,10 @@
 # Release 1.0.1 review evidence
 
+Historical Android-app review. Release 2.0.0 is a data-only Studio widget requiring
+Studio 0.48.0+. It uses a new `studio.bambu.widget` Store registration and PC-owned
+connections; the old APK and its credentials are not migrated. See the root README
+for current setup and the remaining physical acceptance checks.
+
 ## Completed
 
 - Independent public source repository, MIT license and original 512px PNG icon.
