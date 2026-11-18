@@ -96,8 +96,15 @@ public final class BambuTile {
         float size = Math.min(86, width * .34f);
         float artworkX = width - 18 - size;
         float readingWidth = showArtwork ? artworkX - 30 : width - 42;
-        float valueSize = primary.equals("progress") ? Math.min(52, readingWidth / 1.8f) : 30;
-        label(canvas,p,value,22,108,valueSize,text,true,readingWidth);
+        if (primary.equals("progress")) {
+            p.setColor(text);
+            p.setTypeface(Typeface.create("sans-serif-medium", Typeface.NORMAL));
+            p.setTextSize(52);
+            p.setTextSize(BambuPresentation.fittedTextSize(p.getTextSize(), p.measureText(value), readingWidth));
+            canvas.drawText(value, 22, 108, p);
+        } else {
+            label(canvas,p,value,22,108,30,text,true,readingWidth);
+        }
         if (showArtwork) WidgetPresentation.draw(canvas,spec,artworkX,56,size,accent);
         label(canvas,p,primary.equals("progress")?state(s):primary.equals("remaining")?"TIME REMAINING":primary.equals("temperature")?"ACTIVE NOZZLE":"PRINTER STATUS",23,133,11,accent,false,readingWidth);
         String secondary = spec.optString("secondary", "remaining");
