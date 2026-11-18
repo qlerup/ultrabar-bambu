@@ -143,6 +143,59 @@
               "required": true
             },
             {
+              "key": "model",
+              "label": "Printer model",
+              "type": "choice",
+              "required": false,
+              "options": [
+                {
+                  "value": "generic",
+                  "label": "Other / model not selected"
+                },
+                {
+                  "value": "a1",
+                  "label": "A1"
+                },
+                {
+                  "value": "a1-mini",
+                  "label": "A1 mini"
+                },
+                {
+                  "value": "p1p",
+                  "label": "P1P"
+                },
+                {
+                  "value": "p1s",
+                  "label": "P1S"
+                },
+                {
+                  "value": "x1c",
+                  "label": "X1 Carbon"
+                },
+                {
+                  "value": "x1e",
+                  "label": "X1E"
+                },
+                {
+                  "value": "h2d",
+                  "label": "H2D"
+                },
+                {
+                  "value": "h2s",
+                  "label": "H2S"
+                },
+                {
+                  "value": "h2c",
+                  "label": "H2C"
+                },
+                {
+                  "value": "h3c",
+                  "label": "H3C"
+                }
+              ],
+              "help": "Choose the model for its widget illustration and nozzle labels. H2D uses left and right nozzle."
+            },
+            {
               "key": "host",
               "label": "Printer IP address",
               "type": "string",
@@ -171,7 +224,7 @@
             }
           ]
         },
-        "help": "Unfold the widget to see a separate temperature for each nozzle the printer reports. Display preferences apply to this widget. Connections and access codes stay on this PC. Enable controls in Manage printers. Neighboring cards return to their places when the widget closes."
+        "help": "Choose a model in Manage printers for the printer illustration and nozzle presets. H2D shows left and right nozzle. Long job names scroll on one line. Swipe down on the unfolded widget to close; Back, tapping outside or activating the small handle also closes it. Connections and access codes stay on this PC."
       }
     }
   ]
