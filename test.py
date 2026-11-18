@@ -15,6 +15,7 @@ JSON_SHA = "3cf6cd6892e32e2b4c1c39e0f52f5248a2f5b37646fdfbb79a66b46b618414ed"
 
 
 def main():
+    subprocess.run([sys.executable, str(ROOT / 'tests/presets_test.py')], check=True)
     parser = argparse.ArgumentParser()
     parser.add_argument("--jar", type=Path)
     args = parser.parse_args()
