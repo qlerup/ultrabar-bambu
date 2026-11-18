@@ -60,7 +60,7 @@ def main():
     model=next(field for field in panel['connection']['fields'] if field['key']=='model')
     model['options']=[dict(value=value,label=label) for value,label in MODELS]
     panel['presentation']=dict(api=1,source=dict(scope='connection',key='model'),presets=[dict(value=value,artwork=artwork(value),labels={'nozzle.0':'LEFT NOZZLE','nozzle.1':'RIGHT NOZZLE'} if value in ('h2d','h2d-pro') else {}) for value,_ in MODELS])
-    path.write_text(json.dumps(package,indent=2)+'\n',encoding='utf-8')
+    path.write_text(json.dumps(package,indent=2)+'\n',encoding='utf-8',newline='\n')
 
 
 if __name__=='__main__':main()
