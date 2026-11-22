@@ -58,6 +58,12 @@ public final class PanelTest {
         check(state.snapshot().getInt("nozzle_temper") == 218);
         check(PrinterState.nozzleReadings(state.snapshot()).length() == 2);
         PrinterState h3c = new PrinterState();
+        JSONObject partialRack = new JSONObject().put("panel_printtools", new JSONObject()
+            .put("8", new JSONObject().put("actual", 39).put("target", 0)));
+        JSONArray slots = PrinterState.nozzleSlots(partialRack, "H3C");
+        check(slots.length() == 9 && !slots.getJSONObject(0).has("temperature"));
+        check(slots.getJSONObject(8).getInt("temperature") == 39);
+        check(PrinterState.nozzleSlots(state.snapshot(), "H2C").length() == 2);
         JSONArray rack = new JSONArray();
         for (int slot = 0; slot < 9; slot++) rack.put(new JSONObject()
             .put("id", slot == 0 ? 0 : 16 + slot).put("addr_id", slot).put("temp", slot == 0 ? (220 << 16) | 219 : 30 + slot));

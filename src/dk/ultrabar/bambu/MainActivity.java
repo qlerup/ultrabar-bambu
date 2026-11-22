@@ -24,6 +24,7 @@ public final class MainActivity extends Activity {
     private ProgressBar progress;
     private Button pause, stop, light, reconnect, preview, printTools;
     private LinearLayout temperatures;
+    private String selectedModel = "";
     private JSONObject values = new JSONObject();
     private final Runnable tick = new Runnable() {
         public void run() { if (!resumed) return; render(); handler.postDelayed(this, 1000); }
@@ -107,7 +108,14 @@ public final class MainActivity extends Activity {
         if (!demo && resumed) { BambuService.touch(this, false); link = BambuService.selectedMatches(this)?BambuService.current():null; connection = BambuService.status(); detail = BambuService.detail(); }
         try { values = Settings.read(this); } catch (Exception ignored) {}
         String selectedName = "Bambu";
-        try { JSONObject selected = Credentials.read(this); if (selected != null) selectedName = selected.optString("name", selectedName); } catch (Exception ignored) {}
+        selectedModel = "";
+        try {
+            JSONObject selected = Credentials.read(this);
+            if (selected != null) {
+                selectedName = selected.optString("name", selectedName);
+                selectedModel = selected.optString("model");
+            }
+        } catch (Exception ignored) {}
         title.setText(values.optString("printerName", "Bambu Lab") + "  /  " + selectedName); title.setSingleLine(true); title.setEllipsize(android.text.TextUtils.TruncateAt.END);
         if (values.optBoolean("keepScreenOn")) getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         else getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
@@ -129,8 +137,9 @@ public final class MainActivity extends Activity {
         chamber.setText(fresh && s.has("chamber_temper") ? "Chamber  " + temperature(s, "chamber", true) : "");
         JSONObject rack = s.optJSONObject("panel_printtools");
         if (rack == null) rack = s.optJSONObject("panel_nozzles");
-        printTools.setVisibility(fresh && rack != null && rack.length() > 0 ? View.VISIBLE : View.GONE);
-        if (rack != null) printTools.setText("PrintTools (" + rack.length() + ")");
+        int slotCount = "H3C".equalsIgnoreCase(selectedModel) ? 9 : rack == null ? 0 : rack.length();
+        printTools.setVisibility(fresh && slotCount > 0 ? View.VISIBLE : View.GONE);
+        printTools.setText("PrintTools (" + slotCount + ")");
         boolean enabled = !demo && link != null && link.connected() && !link.busy() && values.optBoolean("allowControls");
         String pauseAction = raw.equals("PAUSE") ? "resume" : "pause"; pause.setText(raw.equals("PAUSE") ? "Resume" : "Pause");
         pause.setEnabled(enabled && link.state.allows(pauseAction, now)); stop.setEnabled(enabled && link.state.allows("stop", now));
@@ -147,15 +156,17 @@ public final class MainActivity extends Activity {
     private void showPrintTools() {
         if (link == null || !link.connected() || !link.state.fresh(SystemClock.elapsedRealtime())) return;
         try {
-            JSONArray readings = PrinterState.nozzleReadings(link.state.snapshot());
+            JSONArray readings = PrinterState.nozzleSlots(link.state.snapshot(), selectedModel);
             GridLayout grid = new GridLayout(this);
             int columns = Math.min(5, Math.max(1, (readings.length() + 1) / 2));
             grid.setColumnCount(columns);
             grid.setPadding(dp(12), dp(4), dp(12), dp(4));
             for (int i = 0; i < readings.length(); i++) {
                 JSONObject reading = readings.getJSONObject(i);
-                TextView cell = text("T" + (reading.getInt("tool") + 1) + "   " +
-                    reading.getInt("temperature") + " / " + reading.getInt("target") + "°", 15, TEXT);
+                String value = reading.has("temperature")
+                    ? reading.getInt("temperature") + " / " + reading.getInt("target") + "°"
+                    : "—";
+                TextView cell = text("T" + (reading.getInt("tool") + 1) + "   " + value, 15, TEXT);
                 cell.setPadding(dp(8), dp(6), dp(8), dp(6));
                 grid.addView(cell);
             }

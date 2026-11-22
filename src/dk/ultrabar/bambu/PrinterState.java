@@ -103,6 +103,18 @@ public final class PrinterState {
         }
         return readings;
     }
+    public static JSONArray nozzleSlots(JSONObject snapshot, String model) throws JSONException {
+        if (!"H3C".equalsIgnoreCase(model)) return nozzleReadings(snapshot);
+        JSONObject rack = snapshot.optJSONObject("panel_printtools");
+        JSONArray slots = new JSONArray();
+        for (int slot = 0; slot < 9; slot++) {
+            JSONObject reading = new JSONObject().put("tool", slot);
+            JSONObject tool = rack == null ? null : rack.optJSONObject(Integer.toString(slot));
+            if (tool != null) reading.put("temperature", tool.getInt("actual")).put("target", tool.getInt("target"));
+            slots.put(reading);
+        }
+        return slots;
+    }
     public static String nozzleText(JSONObject snapshot) {
         JSONObject nozzles = snapshot.optJSONObject("panel_nozzles");
         if (nozzles == null || nozzles.length() == 0) return null;
