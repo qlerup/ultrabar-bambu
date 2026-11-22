@@ -64,11 +64,13 @@ def main():
     panel['presentation']=dict(api=1,source=dict(scope='connection',key='model'),presets=[dict(value=value,artwork=artwork(value),labels={'nozzle.0':'LEFT NOZZLE','nozzle.1':'RIGHT NOZZLE'} if value in ('h2d','h2d-pro') else {}) for value,_ in selectable])
     for preset in panel['presentation']['presets']:
         if preset['value'] in ('h2c', 'h3c'):
-            preset['nozzleGrid'] = dict(materialSize=17, swatchSize=18, verticalInset=5)
+            preset['nozzleGrid'] = dict(materialSize=17, swatchSize=18, verticalInset=5,
+                                       sideTemperatures=["chamber_temper","bed_temper"])
             preset['minTemperatureRows'] = 3 if preset['value']=='h3c' else 2
         if preset['value']=='h3c':
             preset['labels']={f'nozzle.{tool}':f'NOZZLE T{tool}' for tool in range(9)}
         if preset['value'] in ('h3c','h2c'):
+            preset['labels'].update(chamber_temper='Chamber',bed_temper='Bed')
             preset['labels'].update({'filament.'+key: label for key,label in {
                 'GFG02':'PETG HF','GFG96':'PETG HF','GFG00':'PETG','GFG99':'PETG',
                 'GFA00':'PLA','GFA01':'PLA Matte','GFL99':'PLA','GFB00':'ABS','GFB99':'ABS',
