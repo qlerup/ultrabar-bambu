@@ -40,9 +40,9 @@ def nozzle_cells():
 
 
 def details():
-    # Reserve space for the rounded mask and the dismiss handle.
+    # The printer heading shares the top of the card with the tool grid.
     nodes = [
-        text('{values.title}  ·  {values.status}', [50, 49, 410, 75], 14, bold=True),
+        text('{values.title}  ·  {values.status}', [50, 52, 205, 85], 14, bold=True),
         text('{values.progress}%', [50, 285, 205, 178], 27, bold=True, when='printer.fresh'),
         text('\u2014', [50, 285, 205, 178], 27, bold=True, unless='printer.fresh'),
         text('{values.job}', [50, 475, 205, 73], 11, when='settings.showJob'),
@@ -59,6 +59,6 @@ def details():
         dict(op='group', box=[803, 0, 197, 485], children=thermometer('Chamber', 'chamber_temper')),
         dict(op='group', box=[803, 515, 197, 485], children=thermometer('Bed', 'bed_temper')),
     ]
-    nodes.append(dict(op='group', box=[280, 133, 670, 774], children=tool_area,
+    nodes.append(dict(op='group', box=[280, 62, 670, 845], children=tool_area,
                       when='settings.showTemperatures'))
     return nodes
