@@ -58,9 +58,18 @@ def main():
     path=Path(__file__).resolve().parents[1]/'widget.json'
     package=json.loads(path.read_text(encoding='utf-8'));panel=package['widgets'][0]['studio']
     model=next(field for field in panel['connection']['fields'] if field['key']=='model')
-    model['options']=[dict(value=value,label=label) for value,label in MODELS]
-    panel['presentation']=dict(api=1,source=dict(scope='connection',key='model'),presets=[dict(value=value,artwork=artwork(value),labels={'nozzle.0':'LEFT NOZZLE','nozzle.1':'RIGHT NOZZLE'} if value in ('h2d','h2d-pro') else {}) for value,_ in MODELS])
-    path.write_text(json.dumps(package,indent=2)+'\n',encoding='utf-8',newline='\n')
+    model['required']=True
+    selectable=[(value,label) for value,label in MODELS if value!='generic']
+    model['options']=[dict(value=value,label=label) for value,label in selectable]
+    panel['presentation']=dict(api=1,source=dict(scope='connection',key='model'),presets=[dict(value=value,artwork=artwork(value),labels={'nozzle.0':'LEFT NOZZLE','nozzle.1':'RIGHT NOZZLE'} if value in ('h2d','h2d-pro') else {}) for value,_ in selectable])
+    for preset in panel['presentation']['presets']:
+        if preset['value'] in ('h2c', 'h3c'):
+            preset['minTemperatureRows'] = 2
+        if preset['value']=='h3c':
+            preset['labels']={f'nozzle.{tool}':f'NOZZLE T{tool}' for tool in range(9)}
+    raw=json.dumps(package,indent=2)
+    if len(raw.encode('utf-8'))>=65536:raw=json.dumps(package,separators=(',',':'))
+    path.write_text(raw+'\n',encoding='utf-8',newline='\n')
 
 
 if __name__=='__main__':main()
