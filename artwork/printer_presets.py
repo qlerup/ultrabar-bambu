@@ -64,6 +64,7 @@ def main():
     panel['presentation']=dict(api=1,source=dict(scope='connection',key='model'),presets=[dict(value=value,artwork=artwork(value),labels={'nozzle.0':'LEFT NOZZLE','nozzle.1':'RIGHT NOZZLE'} if value in ('h2d','h2d-pro') else {}) for value,_ in selectable])
     for preset in panel['presentation']['presets']:
         if preset['value'] in ('h2c', 'h3c'):
+            preset['nozzleGrid'] = dict(materialSize=17, swatchSize=18, verticalInset=5)
             preset['minTemperatureRows'] = 3 if preset['value']=='h3c' else 2
         if preset['value']=='h3c':
             preset['labels']={f'nozzle.{tool}':f'NOZZLE T{tool}' for tool in range(9)}
