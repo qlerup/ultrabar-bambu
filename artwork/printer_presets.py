@@ -31,8 +31,8 @@ PHOTO_ASSETS = {
 }
 
 # H3C's cabinet occupies about 62% of the image height. Match the
-# 87 px cabinet and preserve the baseline at y=136 in the large card.
-PHOTO_BOXES = {'h3c': [153, 4, 98, 132]}
+# 87 px cabinet and center the full photo at y=93 beside the progress text.
+PHOTO_BOXES = {'h3c': [153, 27, 98, 132]}
 
 
 def artwork(model):
