@@ -64,11 +64,21 @@ def main():
     panel['presentation']=dict(api=1,source=dict(scope='connection',key='model'),presets=[dict(value=value,artwork=artwork(value),labels={'nozzle.0':'LEFT NOZZLE','nozzle.1':'RIGHT NOZZLE'} if value in ('h2d','h2d-pro') else {}) for value,_ in selectable])
     for preset in panel['presentation']['presets']:
         if preset['value'] in ('h2c', 'h3c'):
-            preset['minTemperatureRows'] = 2
+            preset['minTemperatureRows'] = 3 if preset['value']=='h3c' else 2
         if preset['value']=='h3c':
             preset['labels']={f'nozzle.{tool}':f'NOZZLE T{tool}' for tool in range(9)}
+        if preset['value'] in ('h3c','h2c'):
+            preset['labels'].update({'filament.'+key: label for key,label in {
+                'GFG02':'PETG HF','GFG96':'PETG HF','GFG00':'PETG','GFG99':'PETG',
+                'GFA00':'PLA','GFA01':'PLA Matte','GFL99':'PLA','GFB00':'ABS','GFB99':'ABS',
+                'GFB01':'ASA','GFB50':'ABS-GF','GFG50':'PETG-CF','GFC00':'PC'
+            }.items()})
     raw=json.dumps(package,indent=2)
-    if len(raw.encode('utf-8'))>=65536:raw=json.dumps(package,separators=(',',':'))
+    if len(raw.encode('utf-8'))>=65536:
+        # Keep each shape on one line and the surrounding package easy to review.
+        import re
+        raw=re.sub(r'\{\s*"type": "(?:rect|roundRect|oval|polygon)",\s*"points": \[[^\]]*\],\s*"fill": "[^"]+"\s*\}',
+                   lambda match: json.dumps(json.loads(match.group())),raw)
     path.write_text(raw+'\n',encoding='utf-8',newline='\n')
 
 

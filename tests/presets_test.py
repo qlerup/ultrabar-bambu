@@ -12,8 +12,9 @@ models=next(field for field in panel['connection']['fields'] if field['key']=='m
 assert {option['value'] for option in models['options']}==set(presets)
 assert presets['h2d']['labels']=={'nozzle.0':'LEFT NOZZLE','nozzle.1':'RIGHT NOZZLE'}
 assert panel['presentation']['source']==dict(scope='connection',key='model')
-assert {key for key,preset in presets.items() if preset.get('minTemperatureRows')==2}=={'h2c','h3c'}
-assert len(presets['h3c']['labels'])==9
+assert {key for key,preset in presets.items() if preset.get('minTemperatureRows')==2}=={'h2c'}
+assert presets['h3c']['minTemperatureRows']==3
+assert sum(k.startswith('nozzle.') for k in presets['h3c']['labels'])==9
 assert models['required'] and 'generic' not in presets
 for model in presets:
     assert presets[model]['artwork']==artwork.artwork(model),model
