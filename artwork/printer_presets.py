@@ -10,6 +10,31 @@ MODELS = [
 ]
 
 
+# Names from the installed Bambu Studio image library. The package owns the
+# choice of image and the card rectangle for each printer.
+PHOTO_ASSETS = {
+    'a1': 'printer_thumbnail_n2s_png.png',
+    'a1-mini': 'printer_thumbnail_n1_png.png',
+    'a2l': 'printer_preview_N9.png',
+    'p1p': 'printer_thumbnail_p1p_png.png',
+    'p1s': 'printer_thumbnail_p1s_png.png',
+    'p2s': 'printer_thumbnail_N7_png.png',
+    'x1': 'printer_thumbnail_png.png',
+    'x1c': 'printer_thumbnail_x1c_png.png',
+    'x1e': 'printer_thumbnail_x1e_png.png',
+    'x2d': 'printer_thumbnail_N6_png.png',
+    'h2d': 'printer_thumbnail_h2d_png.png',
+    'h2d-pro': 'printer_thumbnail_o1e_png.png',
+    'h2s': 'printer_thumbnail_o1s_png.png',
+    'h2c': 'printer_thumbnail_o1c_png.png',
+    'h3c': 'printer_thumbnail_N10_png.png',
+}
+
+# H3C's cabinet occupies about 62% of the image height. Match the
+# 87 px cabinet and preserve the baseline at y=136 in the large card.
+PHOTO_BOXES = {'h3c': [153, 4, 98, 132]}
+
+
 def artwork(model):
     shapes=[]
     def shape(kind, points, color):shapes.append(dict(type=kind,points=points,fill=color))
@@ -62,7 +87,14 @@ def main():
     selectable=[(value,label) for value,label in MODELS if value!='generic']
     model['options']=[dict(value=value,label=label) for value,label in selectable]
     panel['presentation']=dict(api=1,source=dict(scope='connection',key='model'),presets=[dict(value=value,artwork=artwork(value),labels={'nozzle.0':'LEFT NOZZLE','nozzle.1':'RIGHT NOZZLE'} if value in ('h2d','h2d-pro') else {}) for value,_ in selectable])
+    title = next(item for item in panel['layout']['large'] if item.get('text') == '@title')
+    title['box'][2] = 132
     for preset in panel['presentation']['presets']:
+        value = preset['value']
+        photo = {'asset': PHOTO_ASSETS[value]}
+        if value in PHOTO_BOXES:
+            photo['large'] = PHOTO_BOXES[value]
+        preset['images'] = {'printer': photo}
         if preset['value']=='h3c':
             preset['labels']={f'nozzle.{tool}':f'NOZZLE T{tool}' for tool in range(9)}
         if preset['value'] in ('h3c','h2c'):
