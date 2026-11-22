@@ -128,7 +128,8 @@ public final class MainActivity extends Activity {
         nozzle.setText(nozzleSummary == null ? "Nozzle  " + temperature(s, "nozzle", fresh) : nozzleSummary); bed.setText("Bed       " + temperature(s, "bed", fresh));
         chamber.setText(fresh && s.has("chamber_temper") ? "Chamber  " + temperature(s, "chamber", true) : "");
         JSONObject rack = s.optJSONObject("panel_printtools");
-        printTools.setVisibility(fresh && rack != null ? View.VISIBLE : View.GONE);
+        if (rack == null) rack = s.optJSONObject("panel_nozzles");
+        printTools.setVisibility(fresh && rack != null && rack.length() > 0 ? View.VISIBLE : View.GONE);
         if (rack != null) printTools.setText("PrintTools (" + rack.length() + ")");
         boolean enabled = !demo && link != null && link.connected() && !link.busy() && values.optBoolean("allowControls");
         String pauseAction = raw.equals("PAUSE") ? "resume" : "pause"; pause.setText(raw.equals("PAUSE") ? "Resume" : "Pause");
@@ -147,13 +148,21 @@ public final class MainActivity extends Activity {
         if (link == null || !link.connected() || !link.state.fresh(SystemClock.elapsedRealtime())) return;
         try {
             JSONArray readings = PrinterState.nozzleReadings(link.state.snapshot());
-            String[] rows = new String[readings.length()];
+            GridLayout grid = new GridLayout(this);
+            int columns = Math.min(5, Math.max(1, (readings.length() + 1) / 2));
+            grid.setColumnCount(columns);
+            grid.setPadding(dp(12), dp(4), dp(12), dp(4));
             for (int i = 0; i < readings.length(); i++) {
                 JSONObject reading = readings.getJSONObject(i);
-                rows[i] = "PrintTool " + (reading.getInt("tool") + 1) + "   " + reading.getInt("temperature") + " °C";
+                TextView cell = text("T" + (reading.getInt("tool") + 1) + "   " +
+                    reading.getInt("temperature") + " / " + reading.getInt("target") + "°", 15, TEXT);
+                cell.setPadding(dp(8), dp(6), dp(8), dp(6));
+                grid.addView(cell);
             }
-            new AlertDialog.Builder(this).setTitle("PrintTool temperatures")
-                .setItems(rows, null).setPositiveButton("Close", null).show();
+            ScrollView scroll = new ScrollView(this);
+            scroll.addView(grid);
+            new AlertDialog.Builder(this).setTitle("Nozzle temperatures · actual / target")
+                .setView(scroll).setPositiveButton("Close", null).show();
         } catch (JSONException e) {
             Toast.makeText(this, "PrintTool temperatures unavailable", Toast.LENGTH_SHORT).show();
         }
@@ -204,6 +213,15 @@ public final class MainActivity extends Activity {
         JSONObject prefs; try { prefs = Settings.read(this); } catch (Exception e) { prefs = new JSONObject(); }
         EditText name = field(form, "Panel title", prefs.optString("printerName", "Bambu Lab"), false);
         EditText profileName = field(form, "Connection label (for example H2D or workshop printer)", saved == null ? "" : saved.optString("name"), false);
+        String[] models = {"Choose printer model", "A1", "A1 mini", "A2L", "P1P", "P1S", "P2S",
+            "X1", "X1 Carbon", "X1E", "X2D", "H2D", "H2D Pro", "H2S", "H2C", "H3C"};
+        form.addView(text("Printer model", 13, MUTED));
+        Spinner model = new Spinner(this);
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, models);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        model.setAdapter(adapter);
+        model.setSelection(saved == null ? 0 : Math.max(0, adapter.getPosition(saved.optString("model"))));
+        form.addView(model);
         Switch control = toggle(form, "Enable pause / resume / stop / light", prefs.optBoolean("allowControls"));
         Switch temps = toggle(form, "Show temperatures", prefs.optBoolean("showTemperatures", true));
         Switch awake = toggle(form, "Keep screen awake", prefs.optBoolean("keepScreenOn"));
@@ -222,6 +240,14 @@ public final class MainActivity extends Activity {
         AlertDialog dialog = new AlertDialog.Builder(this).setTitle("Bambu settings").setView(scroll)
             .setNegativeButton("Cancel", null).setNeutralButton("Save display", null).setPositiveButton("Save & connect", null).create();
         dialog.setOnShowListener(shown -> {
+            Button saveConnection = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
+            saveConnection.setEnabled(model.getSelectedItemPosition() > 0);
+            model.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                public void onItemSelected(AdapterView<?> parent, View view, int index, long id) {
+                    saveConnection.setEnabled(index > 0);
+                }
+                public void onNothingSelected(AdapterView<?> parent) { saveConnection.setEnabled(false); }
+            });
             Runnable saveDisplay = () -> {
                 try {
                     String printerName = name.getText().toString().trim();
@@ -235,6 +261,7 @@ public final class MainActivity extends Activity {
             });
             dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
                 try {
+                    if (model.getSelectedItemPosition() <= 0) throw new Exception("Choose a printer model.");
                     String h = host.getText().toString().trim(), sn = serial.getText().toString().trim(), access = code.getText().toString();
                     JSONObject old = add ? null : Credentials.read(this);
                     if (access.isEmpty() && old != null && h.equals(old.optString("host")) && sn.equals(old.optString("serial"))) access = old.getString("code");
@@ -242,7 +269,7 @@ public final class MainActivity extends Activity {
                     saveDisplay.run();
                     String label = profileName.getText().toString().trim();
                     if (label.length() > 48 || label.matches("(?s).*[\\p{Cntrl}].*")) throw new Exception("Use a connection label up to 48 characters.");
-                    JSONObject candidate = new JSONObject().put("host", h).put("serial", sn).put("code", access).put("name", label.isEmpty() ? "Bambu Lab" : label);
+                    JSONObject candidate = new JSONObject().put("model", model.getSelectedItem().toString()).put("host", h).put("serial", sn).put("code", access).put("name", label.isEmpty() ? "Bambu Lab" : label);
                     boolean existing = old != null && h.equals(old.optString("host")) && sn.equals(old.optString("serial"));
                     dialog.dismiss(); disconnect(); demo = false;
                     if (existing) { candidate.put("pin", old.getString("pin")); Credentials.save(this, candidate); connect(); }
