@@ -22,13 +22,13 @@ def thermometer(title, field):
 
 
 def nozzle_cells():
-    label_box = [35, 50, 930, 215]
+    label_box = [35, 22, 930, 248]
     temperature_box = [35, 265, 930, 235]
     material_box = [35, 500, 930, 215]
     color_box = [35, 730, 930, 230]
     return [
         background(),
-        text('hotend.{item.tool}', label_box, 11, lookup='labels',
+        text('hotend.{item.tool}', label_box, 13, bold=True, lookup='labels',
              fallback='Hotend {item.tool}', align='center', color=MUTED),
         text('{item.temperature}\u00b0C', temperature_box, 13, bold=True, align='center'),
         text('{item.material}', material_box, 10, when='item.material', align='center'),
@@ -42,8 +42,7 @@ def nozzle_cells():
 def details():
     # Reserve space for the rounded mask and the dismiss handle.
     nodes = [
-        text('{values.title}', [50, 60, 440, 72], 14, bold=True),
-        text('{values.status}', [690, 60, 260, 72], 11, align='right', color='$accent'),
+        text('{values.title}  ·  {values.status}', [50, 49, 410, 75], 14, bold=True),
         text('{values.progress}%', [50, 285, 205, 178], 27, bold=True, when='printer.fresh'),
         text('\u2014', [50, 285, 205, 178], 27, bold=True, unless='printer.fresh'),
         text('{values.job}', [50, 475, 205, 73], 11, when='settings.showJob'),
@@ -60,6 +59,6 @@ def details():
         dict(op='group', box=[803, 0, 197, 485], children=thermometer('Chamber', 'chamber_temper')),
         dict(op='group', box=[803, 515, 197, 485], children=thermometer('Bed', 'bed_temper')),
     ]
-    nodes.append(dict(op='group', box=[280, 150, 670, 750], children=tool_area,
+    nodes.append(dict(op='group', box=[280, 133, 670, 774], children=tool_area,
                       when='settings.showTemperatures'))
     return nodes
