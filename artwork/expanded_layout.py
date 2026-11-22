@@ -22,19 +22,19 @@ def thermometer(title, field):
 
 
 def nozzle_cells():
-    label_box = [35, 22, 930, 248]
-    temperature_box = [35, 265, 930, 235]
-    material_box = [35, 500, 930, 215]
-    color_box = [35, 730, 930, 230]
+    label_box = [65, 180, 465, 265]
+    temperature_box = [65, 480, 465, 340]
+    material_box = [550, 180, 390, 265]
+    color_box = [550, 480, 390, 340]
     return [
         background(),
         text('hotend.{item.tool}', label_box, 13, bold=True, lookup='labels',
-             fallback='Hotend {item.tool}', align='center', color=MUTED),
-        text('{item.temperature}\u00b0C', temperature_box, 13, bold=True, align='center'),
-        text('{item.material}', material_box, 10, when='item.material', align='center'),
-        text('filament.{item.filamentProfile}', material_box, 10, unless='item.material',
+             fallback='Hotend {item.tool}', color=MUTED),
+        text('{item.temperature}\u00b0C', temperature_box, 14, bold=True),
+        text('{item.material}', material_box, 12, when='item.material', align='center'),
+        text('filament.{item.filamentProfile}', material_box, 12, unless='item.material',
              lookup='labels', align='center'),
-        dict(op='swatch', box=color_box, size=10, color='@item.color', radius=2, when='item.color'),
+        dict(op='swatch', box=color_box, size=13, color='@item.color', radius=2, when='item.color'),
         text('\u2014', color_box, 9, unless='item.color', align='center', color=MUTED),
     ]
 

@@ -18,10 +18,14 @@ assert any(g.get('equals')=='h3c' and g['columns']==3 and g['slots']==9 for g in
 assert any(g.get('equals')=='h2c' and g['rows']==2 for g in grids)
 for grid in grids:
     cells = grid['children']
-    fields = ['hotend.{item.tool}', '{item.temperature}\u00b0C', '{item.material}']
-    rows = [next(cell['box'][1] for cell in cells if cell.get('text') == field) for field in fields]
-    rows.append(next(cell['box'][1] for cell in cells if cell['op'] == 'swatch'))
-    assert rows == sorted(set(rows))
+    name, temperature, material = [
+        next(cell['box'] for cell in cells if cell.get('text') == field)
+        for field in ['hotend.{item.tool}', '{item.temperature}\u00b0C', '{item.material}']
+    ]
+    color = next(cell['box'] for cell in cells if cell['op'] == 'swatch')
+    assert name[0] == temperature[0] and material[0] == color[0]
+    assert max(name[0] + name[2], temperature[0] + temperature[2]) <= material[0]
+    assert name[1] == material[1] and temperature[1] == color[1]
 assert models['required'] and 'generic' not in presets
 for model in presets:
     hotend_count = {'h3c': 9, 'h2c': 7}.get(model, 2)
