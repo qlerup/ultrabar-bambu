@@ -55,6 +55,7 @@ public final class PrinterState {
                 data.put(pair[1] + "_temper", packed & 65535L).put(pair[1] + "_target_temper", (packed >>> 16) & 65535L);
             }
         }
+        updatePrintTools(device.optJSONObject("nozzle"));
         JSONObject extruder = device.optJSONObject("extruder"); if (extruder == null) return;
         if (extruder.has("state")) data.put("panel_active_nozzle", (extruder.optInt("state") >>> 4) & 15);
         JSONArray info = extruder.optJSONArray("info");
@@ -68,6 +69,39 @@ public final class PrinterState {
         data.put("panel_nozzles", nozzles);
         JSONObject active = nozzles.optJSONObject(Integer.toString(data.optInt("panel_active_nozzle",0)));
         if(active!=null)data.put("nozzle_temper",active.get("actual")).put("nozzle_target_temper",active.get("target"));
+    }
+    private void updatePrintTools(JSONObject nozzle) throws JSONException {
+        JSONArray info = nozzle == null ? null : nozzle.optJSONArray("info");
+        if (info == null) return;
+        JSONObject tools = data.optJSONObject("panel_printtools");
+        if (tools == null) tools = new JSONObject();
+        for (int i = 0; i < Math.min(info.length(), 16); i++) {
+            JSONObject item = info.optJSONObject(i);
+            if (item == null) continue;
+            Object address = item.opt("addr_id"), liveId = item.opt("id"), raw = item.opt("temp");
+            if (!(address instanceof Integer) || !(liveId instanceof Integer) ||
+                    !(raw instanceof Integer || raw instanceof Long)) continue;
+            int slot = (Integer) address, id = (Integer) liveId;
+            long packed = ((Number) raw).longValue();
+            // SwapTek uses the same rack address when a PrintTool mounts as live ID 0.
+            if (slot >= 0 && slot < 9 && (id == 0 || id == 16 + slot) && packed >= 0 && packed <= 0xffffffffL) {
+                tools.put(Integer.toString(slot), new JSONObject()
+                    .put("actual", packed & 65535L).put("target", packed >>> 16));
+            }
+        }
+        if (tools.length() > 0) data.put("panel_printtools", tools);
+    }
+    public static JSONArray nozzleReadings(JSONObject snapshot) throws JSONException {
+        JSONObject tools = snapshot.optJSONObject("panel_printtools");
+        if (tools == null) tools = snapshot.optJSONObject("panel_nozzles");
+        JSONArray readings = new JSONArray();
+        if (tools == null) return readings;
+        for (int slot = 0; slot < 16; slot++) {
+            JSONObject tool = tools.optJSONObject(Integer.toString(slot));
+            if (tool != null) readings.put(new JSONObject().put("tool", slot)
+                .put("temperature", tool.getInt("actual")).put("target", tool.getInt("target")));
+        }
+        return readings;
     }
     public static String nozzleText(JSONObject snapshot) {
         JSONObject nozzles = snapshot.optJSONObject("panel_nozzles");

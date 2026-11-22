@@ -56,6 +56,22 @@ public final class PanelTest {
         check(state.snapshot().getInt("nozzle_temper") == 209);
         state.accept(report("\"device\":{\"extruder\":{\"state\":2}}"),65500);
         check(state.snapshot().getInt("nozzle_temper") == 218);
+        check(PrinterState.nozzleReadings(state.snapshot()).length() == 2);
+        PrinterState h3c = new PrinterState();
+        JSONArray rack = new JSONArray();
+        for (int slot = 0; slot < 9; slot++) rack.put(new JSONObject()
+            .put("id", slot == 0 ? 0 : 16 + slot).put("addr_id", slot).put("temp", slot == 0 ? (220 << 16) | 219 : 30 + slot));
+        h3c.accept(report("\"device\":{\"nozzle\":{\"info\":" + rack + "}}"), 1000);
+        JSONArray tools = PrinterState.nozzleReadings(h3c.snapshot());
+        check(tools.length() == 9);
+        check(tools.getJSONObject(0).getInt("temperature") == 219);
+        check(tools.getJSONObject(0).getInt("target") == 220);
+        check(tools.getJSONObject(8).getInt("temperature") == 38);
+        h3c.accept(report("\"device\":{\"nozzle\":{\"info\":[{\"id\":16,\"addr_id\":0,\"temp\":175},{\"id\":0,\"addr_id\":8,\"temp\":200}]}}"), 2000);
+        tools = PrinterState.nozzleReadings(h3c.snapshot());
+        check(tools.length() == 9);
+        check(tools.getJSONObject(0).getInt("temperature") == 175);
+        check(tools.getJSONObject(8).getInt("temperature") == 200);
         state.accept(report("\"gcode_state\":\"RUNNING\",\"fun\":\"20000000\""), 66000);
         check(state.requiresSignedCommands()); check(!state.allows("pause", 66001)); check(!state.allows("light_on", 66001));
         state.accept(report("\"fun\":\"0\""), 67000); check(!state.requiresSignedCommands()); check(state.allows("pause", 67001));

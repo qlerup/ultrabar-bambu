@@ -33,11 +33,11 @@ jobs:
           "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" 'build-tools;35.0.0' 'platforms;android-35' >/dev/null
           keytool -genkeypair -keystore "$ANDROID_KEYSTORE" -storepass:env ANDROID_KEY_PASSWORD -keypass:env ANDROID_KEY_PASSWORD -alias ci -keyalg RSA -validity 2 -dname 'CN=Disposable CI test key'
           python build.py
-      - name: Check compiled launcher, permissions and embedded settings
+      - name: Check standalone APK launcher, permissions and embedded settings
         run: |
           "$ANDROID_HOME/build-tools/35.0.0/aapt" dump badging dist/app.apk
           python -c "import json,zipfile; z=zipfile.ZipFile('dist/app.apk'); assert json.loads(z.read('assets/studio-settings.json')) == json.load(open('studio-settings.json')); assert z.read('classes.dex').startswith(bytes([100,101,120,10]))"
-          python -c "import json,zipfile; z=zipfile.ZipFile('dist/app.apk'); assert json.loads(z.read('assets/ultrabar-widgets.json')) == json.load(open('widget.json'))"
+          python -c "import zipfile; assert 'assets/ultrabar-widgets.json' not in zipfile.ZipFile('dist/app.apk').namelist()"
       - name: Compile the widget source from this same repository
         run: |
           mkdir -p build/widget-classes

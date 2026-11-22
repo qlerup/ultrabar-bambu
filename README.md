@@ -1,9 +1,25 @@
 # Bambu for UltraBar Studio
 
-Bambu LAN printer widgets for CoreBAR. Set up printers in **UltraBar Studio on
+Bambu provides a standalone CoreBAR app and a separate home widget.
+
+## Standalone CoreBAR app
+
+The **Bambu Printer Panel** APK can connect directly to printers on your local
+network from CoreBAR. Open **Bambu → Printers** on Core to set up or select a
+printer. The app manages its own connection and stores the access code in
+Android Keystore-encrypted storage. It runs without a PC connection or a running
+copy of UltraBar Studio.
+
+The panel follows one selected printer. On H3C, open **PrintTools** to see the
+temperatures reported for each rack position. The app and the existing home
+widget have separate connection storage.
+
+## Home widget
+
+Set up printers in **UltraBar Studio on
 your PC**, choose a printer for each widget, then Save and Deploy. Studio sends
 live readings to Core through the same channel as CPU, RAM and drive widgets.
-No printer setup or companion app is required on Core.
+The current home widget uses the PC connection.
 
 Requires **Studio 0.52.13+**, root-enabled ARM32 CB01 / LineOS 1.0.9, and compatible
 Bambu LAN firmware. Keep Studio running for live readings and controls.

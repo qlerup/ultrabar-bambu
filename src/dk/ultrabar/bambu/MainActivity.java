@@ -22,7 +22,7 @@ public final class MainActivity extends Activity {
     private String connection = "Not connected", detail = "Set up your printer to begin";
     private TextView title, badge, stateText, job, percent, remaining, layers, nozzle, bed, chamber, note;
     private ProgressBar progress;
-    private Button pause, stop, light, reconnect, preview;
+    private Button pause, stop, light, reconnect, preview, printTools;
     private LinearLayout temperatures;
     private JSONObject values = new JSONObject();
     private final Runnable tick = new Runnable() {
@@ -83,6 +83,9 @@ public final class MainActivity extends Activity {
         bed = text("Bed        —", 21, TEXT); bed.setPadding(0, dp(10), 0, 0); temperatures.addView(bed);
         temperatures.addView(text("Actual / target · °C", 11, MUTED));
         chamber = text("", 13, MUTED); chamber.setPadding(0, dp(6), 0, 0); temperatures.addView(chamber);
+        printTools = button("PrintTools", TEXT, this::showPrintTools);
+        printTools.setVisibility(View.GONE);
+        temperatures.addView(printTools, new LinearLayout.LayoutParams(-1, dp(34)));
         LinearLayout actions = card(32, row); actions.addView(text("PRINTER CONTROLS", 11, MUTED));
         LinearLayout controls = new LinearLayout(this);
         pause = button("Pause", GREEN, () -> command("PAUSE".equals(snapshot().optString("gcode_state")) ? "resume" : "pause"));
@@ -124,6 +127,9 @@ public final class MainActivity extends Activity {
         String nozzleSummary = fresh ? PrinterState.nozzleText(s) : null;
         nozzle.setText(nozzleSummary == null ? "Nozzle  " + temperature(s, "nozzle", fresh) : nozzleSummary); bed.setText("Bed       " + temperature(s, "bed", fresh));
         chamber.setText(fresh && s.has("chamber_temper") ? "Chamber  " + temperature(s, "chamber", true) : "");
+        JSONObject rack = s.optJSONObject("panel_printtools");
+        printTools.setVisibility(fresh && rack != null ? View.VISIBLE : View.GONE);
+        if (rack != null) printTools.setText("PrintTools (" + rack.length() + ")");
         boolean enabled = !demo && link != null && link.connected() && !link.busy() && values.optBoolean("allowControls");
         String pauseAction = raw.equals("PAUSE") ? "resume" : "pause"; pause.setText(raw.equals("PAUSE") ? "Resume" : "Pause");
         pause.setEnabled(enabled && link.state.allows(pauseAction, now)); stop.setEnabled(enabled && link.state.allows("stop", now));
@@ -136,6 +142,21 @@ public final class MainActivity extends Activity {
     private String temperature(JSONObject s, String key, boolean fresh) {
         if (!fresh || !s.has(key + "_temper")) return "—";
         return s.optInt(key + "_temper") + " / " + (s.has(key + "_target_temper") ? s.optInt(key + "_target_temper") : "—") + "°";
+    }
+    private void showPrintTools() {
+        if (link == null || !link.connected() || !link.state.fresh(SystemClock.elapsedRealtime())) return;
+        try {
+            JSONArray readings = PrinterState.nozzleReadings(link.state.snapshot());
+            String[] rows = new String[readings.length()];
+            for (int i = 0; i < readings.length(); i++) {
+                JSONObject reading = readings.getJSONObject(i);
+                rows[i] = "PrintTool " + (reading.getInt("tool") + 1) + "   " + reading.getInt("temperature") + " °C";
+            }
+            new AlertDialog.Builder(this).setTitle("PrintTool temperatures")
+                .setItems(rows, null).setPositiveButton("Close", null).show();
+        } catch (JSONException e) {
+            Toast.makeText(this, "PrintTool temperatures unavailable", Toast.LENGTH_SHORT).show();
+        }
     }
     private String label(String state) {
         switch (state) { case "RUNNING": return "Printing"; case "PAUSE": return "Paused"; case "PREPARE": return "Preparing";

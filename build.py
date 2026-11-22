@@ -41,7 +41,6 @@ def main():
     with zipfile.ZipFile(unsigned, "a", compression=zipfile.ZIP_DEFLATED) as archive:
         archive.write(build / "classes.dex", "classes.dex")
         archive.write(ROOT / "studio-settings.json", "assets/studio-settings.json")
-        archive.write(ROOT / "widget.json", "assets/ultrabar-widgets.json")
     run(tools / ("zipalign" + suffix), "-f", "4", unsigned, build / "aligned.apk")
     run("java", "-jar", tools / "lib/apksigner.jar", "sign", "--ks", keystore,
         "--ks-pass", "env:ANDROID_KEY_PASSWORD", "--v1-signing-enabled", "true",

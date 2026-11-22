@@ -36,6 +36,7 @@ public final class BambuProvider extends ContentProvider {
                 for (String key : new String[]{"gcode_state", "subtask_name", "mc_percent", "mc_remaining_time", "layer_num", "total_layer_num", "nozzle_temper", "nozzle_target_temper", "bed_temper", "bed_target_temper", "chamber_temper", "chamber_target_temper"})
                     if (source.has(key)) data.put(key, source.get(key));
                 data.put("nozzles", PrinterState.nozzleText(source));
+                data.put("nozzle_readings", fresh ? PrinterState.nozzleReadings(source) : new JSONArray());
                 data.put("light", link == null ? JSONObject.NULL : link.state.lightMode());
                 for (String action : new String[]{"pause", "resume", "stop", "light_on", "light_off"})
                     data.put("can_" + action, link != null && Settings.controls(context) && !link.busy() && link.state.allows(action, SystemClock.elapsedRealtime()));
