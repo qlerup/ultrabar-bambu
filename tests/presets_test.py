@@ -12,8 +12,10 @@ models=next(field for field in panel['connection']['fields'] if field['key']=='m
 assert {option['value'] for option in models['options']}==set(presets)
 assert presets['h2d']['labels']=={'nozzle.0':'LEFT NOZZLE','nozzle.1':'RIGHT NOZZLE'}
 assert panel['presentation']['source']==dict(scope='connection',key='model')
-assert {key for key,preset in presets.items() if preset.get('minTemperatureRows')==2}=={'h2c'}
-assert presets['h3c']['minTemperatureRows']==3
+expanded=panel['layout']['expanded']
+grids=[node for group in expanded for node in group.get('children',[]) if node['op']=='grid']
+assert any(g.get('equals')=='h3c' and g['columns']==3 and g['slots']==9 for g in grids)
+assert any(g.get('equals')=='h2c' and g['rows']==2 for g in grids)
 assert sum(k.startswith('nozzle.') for k in presets['h3c']['labels'])==9
 assert models['required'] and 'generic' not in presets
 for model in presets:

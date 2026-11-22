@@ -63,10 +63,6 @@ def main():
     model['options']=[dict(value=value,label=label) for value,label in selectable]
     panel['presentation']=dict(api=1,source=dict(scope='connection',key='model'),presets=[dict(value=value,artwork=artwork(value),labels={'nozzle.0':'LEFT NOZZLE','nozzle.1':'RIGHT NOZZLE'} if value in ('h2d','h2d-pro') else {}) for value,_ in selectable])
     for preset in panel['presentation']['presets']:
-        if preset['value'] in ('h2c', 'h3c'):
-            preset['nozzleGrid'] = dict(materialSize=17, swatchSize=18, verticalInset=5,
-                                       sideTemperatures=["chamber_temper","bed_temper"])
-            preset['minTemperatureRows'] = 3 if preset['value']=='h3c' else 2
         if preset['value']=='h3c':
             preset['labels']={f'nozzle.{tool}':f'NOZZLE T{tool}' for tool in range(9)}
         if preset['value'] in ('h3c','h2c'):
@@ -76,6 +72,13 @@ def main():
                 'GFA00':'PLA','GFA01':'PLA Matte','GFL99':'PLA','GFB00':'ABS','GFB99':'ABS',
                 'GFB01':'ASA','GFB50':'ABS-GF','GFG50':'PETG-CF','GFC00':'PC'
             }.items()})
+    import importlib.util
+    module=importlib.util.spec_from_file_location('expanded_layout',Path(__file__).with_name('expanded_layout.py'))
+    expanded=importlib.util.module_from_spec(module)
+    module.loader.exec_module(expanded)
+    panel['layout']['expanded']=expanded.details()
+    panel['sounds']={event:[note for hz in melody for note in ([hz,160],[0,30])]
+                     for event,melody in {'success':[523.25,659.25,783.99],'error':[740,440,440]}.items()}
     raw=json.dumps(package,indent=2)
     if len(raw.encode('utf-8'))>=65536:
         # Keep each shape on one line and the surrounding package easy to review.
