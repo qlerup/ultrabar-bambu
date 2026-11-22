@@ -95,8 +95,8 @@ def main():
         if value in PHOTO_BOXES:
             photo['large'] = PHOTO_BOXES[value]
         preset['images'] = {'printer': photo}
-        if preset['value']=='h3c':
-            preset['labels']={f'nozzle.{tool}':f'NOZZLE T{tool}' for tool in range(9)}
+        hotend_count = {'h3c': 9, 'h2c': 7}.get(value, 2)
+        preset['labels'].update({f'hotend.{tool}': f'Hotend {tool+1}' for tool in range(hotend_count)})
         if preset['value'] in ('h3c','h2c'):
             preset['labels'].update(chamber_temper='Chamber',bed_temper='Bed')
             preset['labels'].update({'filament.'+key: label for key,label in {
